@@ -254,7 +254,7 @@ public class LFLDA
             String word = elements[0];
             if (word2IdVocabulary.containsKey(word)) {
                 for (int j = 0; j < vectorSize; j++) {
-                    wordVectors[word2IdVocabulary.get(word)][j] = new Double(elements[j + 1]);
+                    wordVectors[word2IdVocabulary.get(word)][j] = Double.parseDouble(elements[j + 1]);
                 }
             }
             for (String line; (line = br.readLine()) != null;) {
@@ -262,7 +262,7 @@ public class LFLDA
                 word = elements[0];
                 if (word2IdVocabulary.containsKey(word)) {
                     for (int j = 0; j < vectorSize; j++) {
-                        wordVectors[word2IdVocabulary.get(word)][j] = new Double(elements[j + 1]);
+                        wordVectors[word2IdVocabulary.get(word)][j] = Double.parseDouble(elements[j + 1]);
                     }
                 }
             }
@@ -328,7 +328,7 @@ public class LFLDA
                 for (int j = 0; j < strTopics.length; j++) {
                     int wordId = corpus.get(docId).get(j);
 
-                    int subtopic = new Integer(strTopics[j]);
+                    int subtopic = Integer.parseInt(strTopics[j]);
                     int topic = subtopic % numTopics;
 
                     if (topic == subtopic) { // Generated from the latent feature component
@@ -628,7 +628,7 @@ public class LFLDA
                 + ".topWords"));
 
         for (int tIndex = 0; tIndex < numTopics; tIndex++) {
-            writer.write("Topic" + new Integer(tIndex) + ":");
+            writer.write("Topic" + tIndex + ":");
 
             Map<Integer, Double> topicWordProbs = new TreeMap<Integer, Double>();
             for (int wIndex = 0; wIndex < vocabularySize; wIndex++) {
