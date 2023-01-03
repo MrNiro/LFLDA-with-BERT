@@ -89,9 +89,9 @@ public class LBFGS
     // y = list of m previous "g" values
     // rho = intermediate calculation
     double[] g, oldg, direction, parameters, oldParameters;
-    LinkedList s = new LinkedList();
-    LinkedList y = new LinkedList();
-    LinkedList rho = new LinkedList();
+    LinkedList<double[]> s = new LinkedList<>();
+    LinkedList<double[]> y = new LinkedList<>();
+    LinkedList<Double> rho = new LinkedList<>();
     double[] alpha;
     static double step = 1.0;
     int iterations;
@@ -130,9 +130,9 @@ public class LBFGS
         if (g == null) { // first time through
             logger.fine("First time through L-BFGS");
             iterations = 0;
-            s = new LinkedList();
-            y = new LinkedList();
-            rho = new LinkedList();
+            s = new LinkedList<>();
+            y = new LinkedList<>();
+            rho = new LinkedList<>();
             alpha = new double[m];
             for (int i = 0; i < m; i++)
                 alpha[i] = 0.0;
@@ -230,15 +230,15 @@ public class LBFGS
             // calculate new direction
             assert (s.size() == y.size()) : "s.size: " + s.size() + " y.size: " + y.size();
             for (int i = s.size() - 1; i >= 0; i--) {
-                alpha[i] = ((Double) rho.get(i)).doubleValue()
-                        * MatrixOps.dotProduct((double[]) s.get(i), direction);
-                MatrixOps.plusEquals(direction, (double[]) y.get(i), -1.0 * alpha[i]);
+                alpha[i] = rho.get(i)
+                        * MatrixOps.dotProduct(s.get(i), direction);
+                MatrixOps.plusEquals(direction, y.get(i), -1.0 * alpha[i]);
             }
             MatrixOps.timesEquals(direction, gamma);
             for (int i = 0; i < y.size(); i++) {
-                double beta = (((Double) rho.get(i)).doubleValue())
-                        * MatrixOps.dotProduct((double[]) y.get(i), direction);
-                MatrixOps.plusEquals(direction, (double[]) s.get(i), alpha[i] - beta);
+                double beta = (rho.get(i))
+                        * MatrixOps.dotProduct(y.get(i), direction);
+                MatrixOps.plusEquals(direction, s.get(i), alpha[i] - beta);
             }
 
             for (int i = 0; i < oldg.length; i++) {
@@ -250,22 +250,11 @@ public class LBFGS
                     + MatrixOps.dotProduct(direction, g) + "\ndirection.2norm: "
                     + MatrixOps.twoNorm(direction) + "\nparameters.2norm: "
                     + MatrixOps.twoNorm(parameters));
-            // TestMaximizable.testValueAndGradientInDirection (maxable,
-            // direction);
             step = lineMaximizer.optimize(direction, step);
             if (step == 0.0) { // could not step in this direction.
                 g = null; // reset search
                 step = 1.0;
                 // xxx Temporary test; passed OK
-                // TestMaximizable.testValueAndGradientInDirection (maxable,
-                // direction);
-                // System.out
-                // .println("\t\tLine search could not step in the current direction.");
-                // throw new OptimizationException(
-                // "Line search could not step in the current direction. "
-                // +
-                // "(This is not necessarily cause for alarm. Sometimes this happens close to the maximum,"
-                // + " where the function may be very flat.)");
                 return false;
             }
             optimizable.getParameters(parameters);
@@ -277,17 +266,6 @@ public class LBFGS
             // if(2.0*Math.abs(newValue-value) <= tolerance*
             // (Math.abs(newValue)+Math.abs(value) + eps)){
             if (Math.abs(newValue - value) <= tolerance) {
-                // System.out.println("\t\tNumber of iterations: "
-                // + iterationCount);
-                // System.out
-                // .println("\t\tExiting L-BFGS on termination #1:\n\t\tvalue difference below "
-                // + tolerance
-                // + " (oldValue: "
-                // + value
-                // + " newValue: "
-                // + newValue
-                // + " gradient.twoNorm: "
-                // + MatrixOps.twoNorm(g) + ")");
                 converged = true;
                 return true;
             }
@@ -344,7 +322,7 @@ public class LBFGS
      * @param toadd
      *            matrix to push onto queue
      */
-    private void push(LinkedList l, double[] toadd)
+    private void push(LinkedList<double[]> l, double[] toadd)
     {
         assert (l.size() <= m);
         if (l.size() == m) {
@@ -353,13 +331,12 @@ public class LBFGS
             // memory of oldest matrix
 
             // this overwrites the oldest matrix
-            double[] last = (double[]) l.get(0);
+            double[] last = l.get(0);
             System.arraycopy(toadd, 0, last, 0, toadd.length);
-            Object ptr = last;
             // this readjusts the pointers in the list
             for (int i = 0; i < l.size() - 1; i++)
                 l.set(i, l.get(i + 1));
-            l.set(m - 1, ptr);
+            l.set(m - 1, last);
         }
         else {
             double[] newArray = new double[toadd.length];
@@ -376,15 +353,13 @@ public class LBFGS
      * @param toadd
      *            double value to push onto queue
      */
-    private void push(LinkedList l, double toadd)
+    private void push(LinkedList<Double> l, double toadd)
     {
         assert (l.size() <= m);
         if (l.size() == m) { // pop old double and add new
             l.removeFirst();
-            l.addLast(new Double(toadd));
         }
-        else
-            l.addLast(new Double(toadd));
+        l.addLast(toadd);
     }
 
 }

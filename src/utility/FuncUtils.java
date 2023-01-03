@@ -58,8 +58,7 @@ public class FuncUtils
     public static int nextDiscrete(double[] probs)
     {
         double sum = 0.0;
-        for (int i = 0; i < probs.length; i++)
-            sum += probs[i];
+        for (double prob : probs) sum += prob;
 
         double r = MTRandom.nextDouble() * sum;
 
