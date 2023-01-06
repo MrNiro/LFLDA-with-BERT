@@ -1,1 +1,7 @@
 .idea
+*.dat
+*.paras
+*.phi
+*.topicAssignment
+*.topWords
+*.theta
